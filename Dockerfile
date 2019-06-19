@@ -1,4 +1,4 @@
-FROM rust:slim
+FROM ubuntu:bionic
 LABEL maintainer="axemann@gmail.com"
 
 ENV TROVE_CONFIG="/config"
@@ -8,7 +8,7 @@ ENV HB_PLATFORM="windows"
 
 RUN mkdir -p /$TROVE_CONFIG /$TROVE_DATA &&\
     apt-get update &&\
-    apt-get install curl wget git cron -y &&\
+    apt-get install wget cron -y &&\
     rm -rf /var/lib/apt/lists/*
 
 RUN wget https://gitlab.com/silver_rust/trove_downloader/-/jobs/artifacts/master/raw/target/x86_64-unknown-linux-musl/release/trove_downloader?job=x86_64-unknown-linux-musl -O /trove_downloader &&\
@@ -24,4 +24,5 @@ RUN chmod 0755 /setup_env
 
 VOLUME /config /download
 
-CMD /bin/bash /setup_env && ./trove_downloader
+ENTRYPOINT [ "/bin/bash", "-c" ]
+CMD [ "/setup_env && service cron start && sleep 120 && /trove_downloader && /bin/bash" ]
